@@ -1,0 +1,228 @@
+openapi: 3.1.0
+info:
+  title: NDI Service health API
+  description: Nace Document Intelligence Service API
+  version: 0.1.0
+tags:
+- name: health
+paths:
+  /api/v1/health/load:
+    get:
+      tags:
+      - health
+      summary: Get Load Probe
+      description: "Return per-status (and per-action) row counts for the calling client.\n\nThe query is two ``GROUP BY`` selects against ``api_requests``:\n\n1. Status totals across all rows belonging to the client (cheap; the\n   table is partitioned by client in production and ``status`` is\n   cardinality-bounded).\n2. Status × action totals filtered to ``created_at >= now() - window``\n   (uses the existing ``(client, created_at)`` index).\n\nBoth queries are read-only and idempotent — safe to poll at 1 Hz."
+      operationId: get_load_probe_api_v1_health_load_get
+      security:
+      - APIKeyHeader: []
+      parameters:
+      - name: window_seconds
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 86400
+          minimum: 1
+          description: Window for the ``in_window`` counts, measured from ``created_at``.
+          default: 300
+          title: Window Seconds
+        description: Window for the ``in_window`` counts, measured from ``created_at``.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoadProbeResponse'
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bad Request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unauthorized
+        '402':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Payment Required
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Conflict
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Request Entity Too Large
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Unprocessable Entity
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Internal Server Error
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Service Unavailable
+components:
+  schemas:
+    LoadProbeResponse:
+      properties:
+        client:
+          type: string
+          title: Client
+        window_seconds:
+          type: integer
+          title: Window Seconds
+        sampled_at:
+          type: string
+          format: date-time
+          title: Sampled At
+        in_flight:
+          $ref: '#/components/schemas/StatusCounts'
+          description: Counts across all rows (any age).
+        in_window:
+          $ref: '#/components/schemas/StatusCounts'
+          description: Counts for rows created within ``window_seconds``.
+        in_window_by_action:
+          $ref: '#/components/schemas/ActionCounts'
+          description: Per-action breakdown for rows created within ``window_seconds``.
+      additionalProperties: false
+      type: object
+      required:
+      - client
+      - window_seconds
+      - sampled_at
+      - in_flight
+      - in_window
+      - in_window_by_action
+      title: LoadProbeResponse
+      description: 'Server-side snapshot of ``api_requests`` for the calling client.
+
+
+        Both ``window_seconds`` and the total counts are returned so callers
+
+        can compute throughput (window counts) and saturation (in-flight =
+
+        ``pending`` + ``running``) without having to do their own arithmetic.'
+    ActionCounts:
+      properties:
+        parse:
+          $ref: '#/components/schemas/StatusCounts'
+        ground:
+          $ref: '#/components/schemas/StatusCounts'
+        extract_region:
+          $ref: '#/components/schemas/StatusCounts'
+        segment_by_category:
+          $ref: '#/components/schemas/StatusCounts'
+      additionalProperties: false
+      type: object
+      title: ActionCounts
+      description: Per-action status breakdown.
+    StatusCounts:
+      properties:
+        pending:
+          type: integer
+          title: Pending
+          description: Rows inserted but workflow not yet running.
+          default: 0
+        running:
+          type: integer
+          title: Running
+          description: Rows the worker has claimed but not finalised.
+          default: 0
+        succeeded:
+          type: integer
+          title: Succeeded
+          description: Terminal — workflow finished cleanly.
+          default: 0
+        failed:
+          type: integer
+          title: Failed
+          description: Terminal — workflow surfaced a typed error.
+          default: 0
+      additionalProperties: false
+      type: object
+      title: StatusCounts
+      description: Row counts for ``api_requests`` grouped by terminal/non-terminal state.
+    ErrorResponse:
+      properties:
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+      additionalProperties: false
+      type: object
+      required:
+      - error
+      title: ErrorResponse
+      description: 'Top-level error body returned by every non-2xx response.
+
+
+        The OpenAPI schema declares this shape so client SDKs can branch on
+
+        ``response.error.code`` deterministically rather than parsing free-form
+
+        ``detail`` strings.'
+    ErrorDetail:
+      properties:
+        code:
+          type: string
+          title: Code
+          description: Stable, machine-readable error code (e.g. ``invalid_payload``).
+        message:
+          type: string
+          title: Message
+          description: Human-readable detail about the error.
+        request_id:
+          type: string
+          title: Request Id
+          description: Per-request correlation id; matches the ``X-Request-Id`` header.
+      additionalProperties: false
+      type: object
+      required:
+      - code
+      - message
+      - request_id
+      title: ErrorDetail
+      description: 'Inner error envelope used by :class:`ErrorResponse`.
+
+
+        ``request_id`` is always populated; callers can quote it back to support
+
+        so we can correlate against logs without having to share the underlying
+
+        Postgres row UUID.'
+  securitySchemes:
+    APIKeyHeader:
+      type: apiKey
+      in: header
+      name: X-API-Key
