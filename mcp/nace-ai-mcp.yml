@@ -1,0 +1,44 @@
+generated: '2026-07-20'
+method: searched
+source: https://docs.ndi.nace.ai/mcp-integration
+api: NDI Service
+name: NDI MCP Server
+status: official
+transport: remote-http
+endpoint: https://ndi-api.nace.ai/mcp
+authentication:
+  type: api-key
+  header: X-API-Key
+  env_var: NDI_API_KEY
+  notes: >-
+    Beta with API-key auth; OAuth support and additional client compatibility
+    may be added. Same account limits and billing apply to REST and MCP calls.
+clients:
+- Cursor
+- MCP-compatible clients
+file_inputs:
+- public HTTPS URL
+- presigned S3 URL
+- 'ndi://file/<uuid> handle from POST /upload'
+tools:
+- name: parse_document
+  description: Convert a document to high-fidelity markdown.
+  maps_to: POST /api/v1/parse_async
+- name: categorize_document
+  description: Classify document sections or spreadsheet sheets against a taxonomy.
+  maps_to: POST /api/v1/categorize_async
+- name: extract_document
+  description: Retrieve structured JSON data from a document.
+  maps_to: POST /api/v1/extract_async
+- name: ground_items
+  description: Locate values and return their source coordinates.
+  maps_to: POST /api/v1/ground_async
+- name: get_job
+  description: Retrieve job status, results, or errors.
+  maps_to: GET /api/v1/jobs/{job_id}
+- name: cancel_job
+  description: Request cancellation of a pending/running job.
+  maps_to: POST /api/v1/jobs/{job_id}/cancel
+notes: >-
+  All document-processing tools operate asynchronously, returning a job_id that
+  is polled via get_job. Tool names and inputs are intended to remain stable.

@@ -1,7 +1,26 @@
 aid: nace-ai
 name: Nace Ai
-description: Nace Ai is a company surfaced as a portfolio company of general-catalyst and added to the
-  API Evangelist network as a stub for enrichment. This profile is a lead awaiting the enrichment pipeline.
+description: >-
+  Nace.AI builds specialized AI models and agents that run enterprise business
+  processes end-to-end on small models customers control. Its NAVI product
+  automates workflows across financial auditing, loan processing, billing,
+  accounts payable, and claims. Nace Document Intelligence (NDI) is its public
+  API: an API-key REST + MCP service that parses documents to high-fidelity
+  markdown, categorizes contents against a taxonomy, grounds values to precise
+  page coordinates, and extracts schema-shaped structured JSON via async jobs.
+accessModel:
+  pricing: unknown
+  onboarding: self-serve
+  trial: false
+  try_now: false
+  public: false
+  label: Self-serve signup
+  confidence: medium
+  source:
+  - authentication
+  generated: '2026-07-22'
+  method: derived
+image: https://nace.ai
 url: https://raw.githubusercontent.com/api-evangelist/nace-ai/refs/heads/main/apis.yml
 x-type: company
 x-source: vc-portfolio
@@ -11,12 +30,94 @@ x-tier: stub
 x-tier-reason: portfolio-lead
 specificationVersion: '0.20'
 created: '2026-07-17'
-modified: '2026-07-17'
+modified: '2026-07-20'
 tags:
 - Company
-apis: []
+- Artificial Intelligence
+- Document Intelligence
+- Document Processing
+- Data Extraction
+- OCR
+- Machine Learning
+- Enterprise Automation
+- MCP
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
+apis:
+- aid: nace-ai:nace-ai-health-api
+  name: Nace Ai health API
+  description: The health API from Nace Ai — 1 operation(s) for health.
+  humanURL: https://docs.ndi.nace.ai
+  baseURL: https://ndi-api.nace.ai/api/v1
+  tags:
+  - health
+  properties:
+  - type: OpenAPI
+    url: openapi/nace-ai-health-api-openapi.yml
+  - type: Documentation
+    url: https://docs.ndi.nace.ai
+  - type: APIReference
+    url: https://ndi-api.nace.ai/docs
+  - type: Quickstart
+    url: https://docs.ndi.nace.ai/quickstart
+- aid: nace-ai:nace-ai-public-api-api
+  name: Nace Ai public-api API
+  description: The public-api API from Nace Ai — 12 operation(s) for public-api.
+  humanURL: https://docs.ndi.nace.ai
+  baseURL: https://ndi-api.nace.ai/api/v1
+  tags:
+  - public-api
+  properties:
+  - type: OpenAPI
+    url: openapi/nace-ai-public-api-api-openapi.yml
+  - type: Documentation
+    url: https://docs.ndi.nace.ai
+  - type: APIReference
+    url: https://ndi-api.nace.ai/docs
+  - type: Quickstart
+    url: https://docs.ndi.nace.ai/quickstart
+common:
+- type: AgenticAccess
+  url: agentic-access/nace-ai-agentic-access.yml
+- type: RateLimits
+  url: rate-limits/nace-ai-rate-limits.yml
+- type: DomainSecurity
+  url: security/nace-ai-domain-security.yml
+- type: Authentication
+  url: authentication/nace-ai-authentication.yml
+- type: ErrorCatalog
+  url: errors/nace-ai-problem-types.yml
+- type: Conventions
+  url: conventions/nace-ai-conventions.yml
+- type: Idempotency
+  url: conventions/nace-ai-conventions.yml
+- type: Conformance
+  url: conformance/nace-ai-conformance.yml
+- type: Lifecycle
+  url: lifecycle/nace-ai-lifecycle.yml
+- type: DataModel
+  url: data-model/nace-ai-data-model.yml
+- type: MCPServer
+  url: mcp/nace-ai-mcp.yml
+- type: LLMsTxt
+  url: llms/nace-ai-llms.txt
+- type: AgentSkill
+  url: skills/_index.yml
+- type: Website
+  url: https://nace.ai
+- type: Blog
+  url: https://nace.ai/blog
+- type: SignUp
+  url: https://nace.ai/contact
+- type: TermsOfService
+  url: https://nace.ai/policies/terms-of-service
+- type: PrivacyPolicy
+  url: https://nace.ai/policies/privacy-policy
+x-enrichment:
+  date: '2026-07-20'
+  status: enriched
+  artifacts_added: 16
+  pass: local-v1

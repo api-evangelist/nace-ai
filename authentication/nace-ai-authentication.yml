@@ -1,0 +1,20 @@
+generated: '2026-07-20'
+method: searched
+source: openapi/nace-ai-ndi-openapi.json
+docs: https://docs.ndi.nace.ai
+key_prefix: ndi_sk_
+notes: >-
+  Single-header API key auth. Send X-API-Key: ndi_sk_... on every request (REST
+  and MCP). The MCP integration docs note OAuth support may be added later.
+summary:
+  types:
+  - apiKey
+  api_key_in:
+  - header
+schemes:
+- name: APIKeyHeader
+  type: apiKey
+  in: header
+  parameter: X-API-Key
+  sources:
+  - openapi/nace-ai-ndi-openapi.json

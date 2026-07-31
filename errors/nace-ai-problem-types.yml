@@ -1,0 +1,91 @@
+generated: '2026-07-20'
+method: searched
+source:
+- openapi/nace-ai-ndi-openapi.json
+- https://docs.ndi.nace.ai/concepts/errors
+api: NDI Service
+# NDI does NOT use RFC 9457 application/problem+json. Every non-2xx returns a
+# custom stable envelope: {"error": {"code": <stable string>, "message": <text>,
+# "request_id": <uuid, matches X-Request-Id header>}} as application/json.
+format: custom
+envelope:
+  media_type: application/json
+  schema: ErrorResponse
+  shape: '{ "error": { "code": string, "message": string, "request_id": string } }'
+  machine_readable_field: error.code
+  correlation_field: error.request_id
+  correlation_header: X-Request-Id
+notes: >-
+  Clients should branch on error.code (stable, machine-readable) rather than
+  parsing free-form message strings. request_id is always populated and can be
+  quoted back to support for log correlation.
+# Stable error.code values below are from the published Errors & limits reference
+# (https://docs.ndi.nace.ai/concepts/errors); branch on code, not the HTTP status alone.
+http_statuses:
+- status: 400
+  code: bad_request
+  title: Bad Request
+  meaning: Malformed request.
+  remediation: Validate the request body against the OpenAPI schema before retrying.
+- status: 401
+  code: unauthorized
+  title: Unauthorized
+  meaning: Missing, invalid, or revoked API key.
+  remediation: Send a valid API key in the X-API-Key header.
+- status: 402
+  code: quota_exceeded
+  title: Payment Required
+  meaning: Credits exhausted.
+  remediation: Not retryable; raise the credit limit / resolve billing on the account.
+- status: 403
+  code: forbidden
+  title: Forbidden
+  meaning: Unauthorized storage access (e.g. key lacks access to the source bucket/tenant).
+  remediation: Use a key/credentials with access to the target resource.
+- status: 404
+  code: not_found
+  title: Not Found
+  meaning: Resource (e.g. job_id) does not exist or belongs to another tenant.
+  remediation: Verify the job_id; jobs are tenant-scoped so cross-tenant reads return 404.
+- status: 408
+  code: sync_timeout
+  title: Request Timeout
+  meaning: Sync call exceeded timeout_seconds; the job keeps running.
+  remediation: Poll GET /api/v1/jobs/{job_id} until status is succeeded or failed.
+- status: 409
+  title: Conflict
+  meaning: Conflicting state for the request.
+  remediation: Resolve the conflicting resource state and retry.
+- status: 410
+  title: Gone
+  meaning: Upload handle (ndi://file/<uuid>) expired past its advertised expires_at.
+  remediation: Re-upload the document via POST /api/v1/upload to obtain a fresh handle.
+- status: 413
+  code: payload_too_large
+  title: Request Entity Too Large
+  meaning: Upload exceeds the 200 MB limit (NDI_MAX_UPLOAD_BYTES) or payload too large.
+  remediation: Reduce the payload / split the document before uploading.
+- status: 422
+  code: validation_error
+  title: Unprocessable Entity
+  meaning: Request validation failed (e.g. unsupported extract schema construct).
+  remediation: Correct the input per the endpoint schema constraints.
+- status: 429
+  code: too_many_requests
+  title: Too Many Requests
+  meaning: Rate limit hit (60 req/min per tenant, or the concurrent-job cap).
+  remediation: Respect the Retry-After header, then retry. See rate-limits/nace-ai-rate-limits.yml.
+- status: 500
+  code: internal_error
+  title: Internal Server Error
+  meaning: Unexpected server-side failure.
+  remediation: Retry with backoff; quote request_id to support if it persists.
+- status: 503
+  code: service_unavailable
+  title: Service Unavailable
+  meaning: Temporary unavailability.
+  remediation: Retry with exponential backoff (reuse the same idempotency_key on POST).
+job_error_codes:
+# Terminal job failures surface as JobStatus.status=failed with a typed JobError {code,message}.
+- code: cancelled
+  meaning: Job was cancelled via POST /api/v1/jobs/{job_id}/cancel (no separate cancelled status).

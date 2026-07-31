@@ -1,0 +1,20 @@
+generated: '2026-07-20'
+method: generated
+source: openapi/nace-ai-ndi-openapi.json
+api: NDI Service
+skills:
+- name: nace-ai-extract-document-data
+  file: nace-ai-extract-document-data.md
+  description: Extract schema-shaped structured JSON from a document.
+  operations:
+  - upload_file_api_v1_upload_post
+  - extract_async_api_v1_extract_async_post
+  - get_job_api_v1_jobs__job_id__get
+- name: nace-ai-parse-and-ground
+  file: nace-ai-parse-and-ground.md
+  description: Parse a document to markdown, then ground values to page coordinates.
+  operations:
+  - upload_file_api_v1_upload_post
+  - parse_async_api_v1_parse_async_post
+  - ground_async_api_v1_ground_async_post
+  - get_job_api_v1_jobs__job_id__get

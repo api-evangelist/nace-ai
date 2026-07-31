@@ -1,0 +1,31 @@
+generated: '2026-07-20'
+method: derived
+source:
+- openapi/nace-ai-ndi-openapi.json
+- https://docs.ndi.nace.ai
+- https://docs.ndi.nace.ai/mcp-integration
+api: NDI Service
+versioning:
+  style: uri-path
+  current_version: v1
+  spec_version: 0.1.0
+  base_path: /api/v1
+maturity: beta
+  # MCP integration docs describe the service as "currently in beta"; tool names/inputs
+  # intended to remain stable.
+deprecation:
+  policy_documented: false
+  sunset_header: not observed
+  deprecated_operations: []
+status_page:
+  url: null
+  found: false
+  note: No public status page discovered; GET /api/v1/health/load offers a per-client load probe.
+sla:
+  documented: false
+handles_ttl:
+  upload_file: UploadResponse.expires_at (~6 days managed staging window)
+  result_download_urls: ~1 hour (re-fetch job to refresh)
+notes: >-
+  No dated changelog, deprecation policy, or public status page was found as of
+  2026-07-20. Version is carried in the URL path (/api/v1).

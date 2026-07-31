@@ -1,0 +1,78 @@
+generated: '2026-07-20'
+method: derived
+source:
+- openapi/nace-ai-ndi-openapi.json
+- https://docs.ndi.nace.ai
+api: NDI Service
+base_url: https://ndi-api.nace.ai/api/v1
+authentication:
+  style: api-key
+  header: X-API-Key
+  key_prefix: ndi_sk_
+  docs: https://docs.ndi.nace.ai
+idempotency:
+  supported: true
+  mechanism: request-body-field
+  field: idempotency_key
+  max_length: 128
+  applies_to:
+  - parse
+  - parse_async
+  - ground
+  - ground_async
+  - categorize
+  - categorize_async
+  - extract
+  - extract_async
+  replay_behavior: >-
+    Repeating a POST with the same idempotency_key returns the original job
+    (HTTP 200 with the job's current JobStatus) instead of starting a new one.
+  notes: Idempotency is carried in the JSON request body, not an Idempotency-Key header.
+pagination:
+  style: cursor
+  endpoint: GET /api/v1/jobs
+  params:
+    limit: { default: 50, max: 200 }
+    cursor: next_cursor from the previous page; omit for the newest page
+    status: optional filter (pending|running|succeeded|failed)
+  response_fields:
+    items: jobs[]
+    next_cursor: next_cursor (null when exhausted)
+  order: newest-first
+async_jobs:
+  pattern: 202-accepted-then-poll
+  submit: POST /api/v1/{action}_async returns 202 with { job_id }
+  poll: GET /api/v1/jobs/{job_id} returns JobStatus
+  statuses: [pending, running, succeeded, failed]
+  cancel: POST /api/v1/jobs/{job_id}/cancel (surfaces as failed with error.code=cancelled)
+  sync_variants: >-
+    Sync endpoints (/parse, /ground, /categorize, /extract) accept ?timeout_seconds
+    (1-300, default 120); on timeout they return 408 (poll) or 202 (no sync capacity).
+request_tracing:
+  request_id_header: X-Request-Id
+  request_id_body_field: error.request_id
+  notes: request_id is echoed in every error body and matches the X-Request-Id response header.
+versioning:
+  style: uri-path
+  current: v1
+  base_path: /api/v1
+error_envelope:
+  format: custom
+  media_type: application/json
+  shape: '{ "error": { "code": string, "message": string, "request_id": string } }'
+  cross_ref: errors/nace-ai-problem-types.yml
+file_inputs:
+  source_url_schemes:
+  - 'ndi://file/<uuid>  (from POST /upload)'
+  - 'https://  (presigned or public)'
+  - 's3://bucket/key'
+  upload_handle_ttl: advertised via UploadResponse.expires_at (~6 days managed staging)
+rate_limits:
+  signaling: 429 too_many_requests with Retry-After header; 402 quota_exceeded signals credit exhaustion
+  defaults: 60 req/min, 10 concurrent jobs, 4 concurrent sync waits, 50k included credits (per tenant)
+  load_probe: GET /api/v1/health/load returns per-status/per-action in-flight + windowed counts for self-throttling
+  cross_ref: rate-limits/nace-ai-rate-limits.yml
+cross_links:
+  errors: errors/nace-ai-problem-types.yml
+  authentication: authentication/nace-ai-authentication.yml
+  lifecycle: lifecycle/nace-ai-lifecycle.yml

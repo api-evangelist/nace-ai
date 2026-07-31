@@ -1,0 +1,50 @@
+specification: API Commons Rate Limits
+specificationVersion: '0.1'
+provider: Nace.AI — NDI
+providerId: nace-ai
+generated: '2026-07-20'
+method: searched
+created: '2026-07-20'
+modified: '2026-07-20'
+tags:
+  - Rate Limiting
+  - Document Intelligence
+description: >-
+  NDI enforces per-tenant default rate limits documented on the Errors & limits
+  page. Requests-per-minute and sync-wait concurrency throttle to 429 (with a
+  Retry-After header) or degrade to 202 polling; credit exhaustion surfaces as
+  402 quota_exceeded (not retryable).
+sources:
+  - https://docs.ndi.nace.ai/concepts/errors
+headers:
+  requestId: X-Request-Id
+  retryAfter: Retry-After
+responseCodes:
+  throttled: 429
+  quotaExceeded: 402
+limits:
+  - name: Requests per minute (per tenant)
+    scope: tenant
+    metric: requests_per_minute
+    limit: 60
+    timeFrame: minute
+    on_exceed: 429 too_many_requests with Retry-After header; respect it then retry
+  - name: Concurrent jobs (pending + running)
+    scope: tenant
+    metric: concurrent_jobs
+    limit: 10
+    timeFrame: concurrent
+    on_exceed: 429 too_many_requests
+  - name: Concurrent sync waits
+    scope: tenant
+    metric: concurrent_sync_waits
+    limit: 4
+    timeFrame: concurrent
+    on_exceed: degrades to 202 (poll GET /api/v1/jobs/{job_id})
+credits:
+  included: 50000
+  on_exhaustion: 402 quota_exceeded (not retryable; raise credit limit)
+notes: >-
+  Values are documented defaults and may be raised per account. GET
+  /api/v1/health/load returns per-client in-flight and windowed counts so
+  callers can self-throttle before hitting the limits.

@@ -1,0 +1,16 @@
+{
+  "provider": "nace-ai",
+  "sources": [
+    "nace-ai-health-api-openapi.yml",
+    "nace-ai-public-api-api-openapi.yml"
+  ],
+  "outputs": [
+    "nace-ai-health-api-openapi.yml",
+    "nace-ai-public-api-api-openapi.yml"
+  ],
+  "archived": [],
+  "errors": [],
+  "warnings": [],
+  "notes": [],
+  "skipped": []
+}

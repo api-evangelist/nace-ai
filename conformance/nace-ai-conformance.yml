@@ -1,0 +1,46 @@
+generated: '2026-07-20'
+method: derived
+source:
+- openapi/nace-ai-ndi-openapi.json
+- https://docs.ndi.nace.ai
+api: NDI Service
+standards:
+- id: oauth2
+  conforms: false
+  evidence: No oauth2 security scheme; auth is a static X-API-Key header. (Docs note OAuth may be added later.)
+- id: oidc
+  conforms: false
+  evidence: No OpenID Connect; no /.well-known/openid-configuration (404).
+- id: rfc9457
+  conforms: false
+  evidence: Errors use a custom {error:{code,message,request_id}} envelope as application/json, not application/problem+json.
+- id: idempotency
+  conforms: true
+  evidence: idempotency_key body field (max 128) on all action endpoints; replay returns the original job (HTTP 200).
+- id: pagination
+  conforms: true
+  evidence: GET /api/v1/jobs is cursor-paginated (limit/cursor/next_cursor), newest-first.
+- id: openapi
+  conforms: true
+  evidence: Published OpenAPI 3.1.0 at https://ndi-api.nace.ai/openapi.json (interactive docs at /docs).
+- id: mcp
+  conforms: true
+  evidence: Official remote MCP server at https://ndi-api.nace.ai/mcp (see mcp/nace-ai-mcp.yml).
+- id: json:api
+  conforms: false
+  evidence: Plain JSON payloads; not JSON:API media type or structure.
+- id: fhir
+  conforms: false
+  evidence: General document-intelligence API; no healthcare/FHIR resources.
+- id: fapi
+  conforms: false
+  evidence: No OAuth2/FAPI security profile.
+- id: scim
+  conforms: false
+  evidence: No user/group provisioning surface.
+- id: odata
+  conforms: false
+  evidence: No OData query conventions.
+- id: psd2
+  conforms: false
+  evidence: Not an open-banking API.

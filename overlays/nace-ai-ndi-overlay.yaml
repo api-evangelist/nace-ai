@@ -1,0 +1,38 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enrichment overlay for NDI Service
+  version: 1.0.0
+extends: ../openapi/nace-ai-ndi-openapi.json
+x-generated: '2026-07-20'
+x-method: generated
+x-source: openapi/nace-ai-ndi-openapi.json
+actions:
+# The published spec ships no servers[]; the production base URL is documented at
+# https://docs.ndi.nace.ai and confirmed live (openapi.json served from this host).
+- target: $
+  description: Add the production server the published spec omits.
+  update:
+    servers:
+    - url: https://ndi-api.nace.ai
+      description: NDI production API
+- target: $.info
+  description: Enrich API metadata with contact/docs and provider identity.
+  update:
+    x-provider: Nace.AI
+    x-product: NDI (Nace Document Intelligence)
+    externalDocs:
+      description: NDI documentation
+      url: https://docs.ndi.nace.ai
+    contact:
+      name: Nace.AI
+      url: https://nace.ai
+- target: $.components.securitySchemes.APIKeyHeader
+  description: Document the API key format and where to obtain it.
+  update:
+    description: >-
+      API key in the X-API-Key header. Keys are prefixed ndi_sk_. Obtain a key
+      and read the quickstart at https://docs.ndi.nace.ai.
+- target: $.paths['/api/v1/parse']
+  description: Note the official remote MCP server that fronts these operations.
+  update:
+    x-mcp-server: https://ndi-api.nace.ai/mcp
