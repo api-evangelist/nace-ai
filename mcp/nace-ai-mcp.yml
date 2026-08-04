@@ -3,7 +3,8 @@ method: searched
 source: https://docs.ndi.nace.ai/mcp-integration
 api: NDI Service
 name: NDI MCP Server
-status: official
+status: published
+status_raw: official
 transport: remote-http
 endpoint: https://ndi-api.nace.ai/mcp
 authentication:
