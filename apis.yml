@@ -80,6 +80,8 @@ apis:
   - type: Quickstart
     url: https://docs.ndi.nace.ai/quickstart
 common:
+- type: Overlay
+  url: overlays/nace-ai-ndi-overlay.yaml
 - type: AgenticAccess
   url: agentic-access/nace-ai-agentic-access.yml
 - type: RateLimits
