@@ -1,0 +1,43 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "NDI Service health API",
+    "version": "0.1.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "health",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get Load Probe",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/health/load",
+            "params": [
+              {
+                "name": "window_seconds",
+                "value": "",
+                "type": "query",
+                "description": "Window for the ``in_window`` counts, measured from ``created_at``."
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "X-API-Key",
+              "value": "{{X-API-Key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Return per-status (and per-action) row counts for the calling client.\n\nThe query is two ``GROUP BY`` selects against ``api_requests``:\n\n1. Status totals across all rows belonging to the client (cheap; the\n   table is partitioned by client in production and ``status`` is\n   cardinality-bounded).\n2. Status × action totals filtered to ``created_at >= now() - window``\n   (uses the existing ``(client, created_at)`` index).\n\nBoth queries are read-only and idempotent — safe to poll at 1 Hz."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

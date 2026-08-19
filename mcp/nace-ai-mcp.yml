@@ -11,16 +11,15 @@ authentication:
   type: api-key
   header: X-API-Key
   env_var: NDI_API_KEY
-  notes: >-
-    Beta with API-key auth; OAuth support and additional client compatibility
-    may be added. Same account limits and billing apply to REST and MCP calls.
+  notes: Beta with API-key auth; OAuth support and additional client compatibility may be added. Same
+    account limits and billing apply to REST and MCP calls.
 clients:
 - Cursor
 - MCP-compatible clients
 file_inputs:
 - public HTTPS URL
 - presigned S3 URL
-- 'ndi://file/<uuid> handle from POST /upload'
+- ndi://file/<uuid> handle from POST /upload
 tools:
 - name: parse_document
   description: Convert a document to high-fidelity markdown.
@@ -40,6 +39,11 @@ tools:
 - name: cancel_job
   description: Request cancellation of a pending/running job.
   maps_to: POST /api/v1/jobs/{job_id}/cancel
-notes: >-
-  All document-processing tools operate asynchronously, returning a job_id that
-  is polled via get_job. Tool names and inputs are intended to remain stable.
+notes: All document-processing tools operate asynchronously, returning a job_id that is polled via get_job.
+  Tool names and inputs are intended to remain stable.
+deployment:
+  mode: remote
+  verified: searched
+  tools: 6
+  checked: '2026-08-12'
+  source: catalog MCP census

@@ -1,0 +1,324 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "NDI Service health public-api API",
+    "version": "0.1.0"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "public-api",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Parse Async",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/parse_async",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "X-API-Key",
+              "value": "{{X-API-Key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Start a parse job; returns a ``job_id`` to poll."
+        },
+        {
+          "info": {
+            "name": "Parse Sync",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/parse",
+            "params": [
+              {
+                "name": "timeout_seconds",
+                "value": "",
+                "type": "query",
+                "description": "Max seconds to wait before returning 408 (the job keeps running; poll GET /jobs/{job_id})."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "X-API-Key",
+              "value": "{{X-API-Key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Parse a document and wait for the result (small documents; use /parse_async for large ones)."
+        },
+        {
+          "info": {
+            "name": "Upload File",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/upload",
+            "body": {
+              "type": "multipart-form",
+              "data": []
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "X-API-Key",
+              "value": "{{X-API-Key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Stage a document and return an opaque ``file_id``.\n\nPass ``ndi://file/<file_id>`` as ``source_url`` on any action endpoint.\nUpload once, reuse across parse → categorize / ground.\n\n``expires_at`` is the advertised handle lifetime (managed staging lifecycle\nminus a safety margin). For ``byo_bucket`` tenants the same window is\nadvertised for contract consistency, but actual object deletion follows\nthe tenant's own bucket lifecycle configuration."
+        },
+        {
+          "info": {
+            "name": "Ground Async",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/ground_async",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "X-API-Key",
+              "value": "{{X-API-Key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Start a ground job: locate values inside a document."
+        },
+        {
+          "info": {
+            "name": "Ground Sync",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/ground",
+            "params": [
+              {
+                "name": "timeout_seconds",
+                "value": "",
+                "type": "query",
+                "description": "Max seconds to wait before returning 408 (the job keeps running; poll GET /jobs/{job_id})."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "X-API-Key",
+              "value": "{{X-API-Key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Ground values in a document and wait for the result."
+        },
+        {
+          "info": {
+            "name": "Categorize Async",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/categorize_async",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "X-API-Key",
+              "value": "{{X-API-Key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Start a categorize job: classify document segments/sheets against a taxonomy."
+        },
+        {
+          "info": {
+            "name": "Categorize Sync",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/categorize",
+            "params": [
+              {
+                "name": "timeout_seconds",
+                "value": "",
+                "type": "query",
+                "description": "Max seconds to wait before returning 408 (the job keeps running; poll GET /jobs/{job_id})."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "X-API-Key",
+              "value": "{{X-API-Key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Categorize a document and wait for the result."
+        },
+        {
+          "info": {
+            "name": "Extract Async",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/extract_async",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "X-API-Key",
+              "value": "{{X-API-Key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Start an extract job: pull schema-shaped structured data out of a document."
+        },
+        {
+          "info": {
+            "name": "Extract Sync",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/extract",
+            "params": [
+              {
+                "name": "timeout_seconds",
+                "value": "",
+                "type": "query",
+                "description": "Max seconds to wait before returning 408 (the job keeps running; poll GET /jobs/{job_id})."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "apikey",
+              "key": "X-API-Key",
+              "value": "{{X-API-Key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Extract structured data from a document and wait for the result."
+        },
+        {
+          "info": {
+            "name": "List Jobs",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/jobs",
+            "params": [
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Jobs per page."
+              },
+              {
+                "name": "cursor",
+                "value": "",
+                "type": "query",
+                "description": "``next_cursor`` from the previous page; omit for the newest page."
+              },
+              {
+                "name": "status",
+                "value": "",
+                "type": "query",
+                "description": "Optional status filter."
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "X-API-Key",
+              "value": "{{X-API-Key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "List the tenant's jobs, newest first (summaries only — no result payloads)."
+        },
+        {
+          "info": {
+            "name": "Get Job",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/jobs/:job_id",
+            "params": [
+              {
+                "name": "job_id",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "X-API-Key",
+              "value": "{{X-API-Key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Return the current state of a job (tenant-scoped; other tenants see 404)."
+        },
+        {
+          "info": {
+            "name": "Cancel Job",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/jobs/:job_id/cancel",
+            "params": [
+              {
+                "name": "job_id",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "auth": {
+              "type": "apikey",
+              "key": "X-API-Key",
+              "value": "{{X-API-Key}}",
+              "placement": "header"
+            }
+          },
+          "docs": "Cancel a pending/running job.\n\nCancellation surfaces as ``status=failed`` with ``error.code=cancelled``\n(there is no separate ``cancelled`` status). Idempotent: cancelling an\nalready-terminal job returns its current state unchanged."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}
