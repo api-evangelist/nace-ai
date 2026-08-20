@@ -38,6 +38,16 @@ tags:
 - Document Processing
 - Data Extraction
 - OCR
+- Machine-Learning
+- Enterprise Automation
+- MCP
+tags_raw:
+- Company
+- Artificial Intelligence
+- Document Intelligence
+- Document Processing
+- Data Extraction
+- OCR
 - Machine Learning
 - Enterprise Automation
 - MCP
@@ -53,6 +63,8 @@ apis:
   humanURL: https://docs.ndi.nace.ai
   baseURL: https://ndi-api.nace.ai/api/v1
   tags:
+  - Health
+  tags_raw:
   - health
   properties:
   - type: OpenAPI
@@ -69,6 +81,8 @@ apis:
   humanURL: https://docs.ndi.nace.ai
   baseURL: https://ndi-api.nace.ai/api/v1
   tags:
+  - Public API
+  tags_raw:
   - public-api
   properties:
   - type: OpenAPI
