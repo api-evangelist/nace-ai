@@ -8,6 +8,18 @@ description: >-
   API: an API-key REST + MCP service that parses documents to high-fidelity
   markdown, categorizes contents against a taxonomy, grounds values to precise
   page coordinates, and extracts schema-shaped structured JSON via async jobs.
+deliveryModel:
+  model: saas
+  open_source: false
+  commercial: true
+  callable_host: true
+  label: Hosted service · you call their endpoint
+  confidence: high
+  source:
+  - openapi
+  - pricing
+  generated: '2026-08-28'
+  method: derived
 accessModel:
   pricing: unknown
   onboarding: self-serve
