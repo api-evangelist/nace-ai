@@ -1,13 +1,11 @@
 aid: nace-ai
 name: Nace Ai
-description: >-
-  Nace.AI builds specialized AI models and agents that run enterprise business
-  processes end-to-end on small models customers control. Its NAVI product
-  automates workflows across financial auditing, loan processing, billing,
-  accounts payable, and claims. Nace Document Intelligence (NDI) is its public
-  API: an API-key REST + MCP service that parses documents to high-fidelity
-  markdown, categorizes contents against a taxonomy, grounds values to precise
-  page coordinates, and extracts schema-shaped structured JSON via async jobs.
+description: 'Nace.AI builds specialized AI models and agents that run enterprise business processes end-to-end
+  on small models customers control. Its NAVI product automates workflows across financial auditing, loan
+  processing, billing, accounts payable, and claims. Nace Document Intelligence (NDI) is its public API:
+  an API-key REST + MCP service that parses documents to high-fidelity markdown, categorizes contents
+  against a taxonomy, grounds values to precise page coordinates, and extracts schema-shaped structured
+  JSON via async jobs.'
 deliveryModel:
   model: saas
   open_source: false
@@ -44,7 +42,7 @@ x-tier: stub
 x-tier-reason: portfolio-lead
 specificationVersion: '0.23'
 created: '2026-07-17'
-modified: '2026-07-20'
+modified: '2026-09-16'
 tags:
 - Company
 - Artificial Intelligence
@@ -90,7 +88,7 @@ apis:
   - type: Quickstart
     url: https://docs.ndi.nace.ai/quickstart
 - aid: nace-ai:nace-ai-public-api-api
-  name: Nace Ai public-api API
+  name: Nace Ai public-api
   description: The public-api API from Nace Ai — 12 operation(s) for public-api.
   humanURL: https://docs.ndi.nace.ai
   baseURL: https://ndi-api.nace.ai/api/v1
