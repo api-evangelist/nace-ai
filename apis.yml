@@ -93,7 +93,7 @@ apis:
   humanURL: https://docs.ndi.nace.ai
   baseURL: https://ndi-api.nace.ai/api/v1
   tags:
-  - Public API
+  - Public APIs
   tags_raw:
   - public-api
   properties:
