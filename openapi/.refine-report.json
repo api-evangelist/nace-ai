@@ -1,8 +1,7 @@
 {
   "provider": "nace-ai",
   "sources": [
-    "nace-ai-health-api-openapi.yml",
-    "nace-ai-public-api-api-openapi.yml"
+    "_original/nace-ai-ndi-openapi.json"
   ],
   "outputs": [
     "nace-ai-health-api-openapi.yml",
@@ -11,6 +10,15 @@
   "archived": [],
   "errors": [],
   "warnings": [],
-  "notes": [],
-  "skipped": []
+  "notes": [
+    "sourced from openapi/_original/ (1 archived document(s)); previously refined output at the top level was skipped rather than re-split",
+    "nace-ai-ndi-openapi.json: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "nace-ai-ndi-openapi.json: declared missing tag: health",
+    "nace-ai-ndi-openapi.json: declared missing tag: public-api",
+    "apis.yml register: already-registered"
+  ],
+  "skipped": [
+    "nace-ai-health-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "nace-ai-public-api-api-openapi.yml: previously refined output, superseded by openapi/_original/"
+  ]
 }

@@ -1,15 +1,15 @@
-openapi: 3.1.0
+openapi: 3.2.0
 info:
-  title: NDI Service health public-api API
+  title: NDI Service Public API
   description: Nace Document Intelligence Service API
   version: 0.1.0
 tags:
-- name: public-api
+- name: Public API
 paths:
   /api/v1/parse_async:
     post:
       tags:
-      - public-api
+      - Public API
       summary: Parse Async
       description: Start a parse job; returns a ``job_id`` to poll.
       operationId: parse_async_api_v1_parse_async_post
@@ -97,7 +97,7 @@ paths:
   /api/v1/parse:
     post:
       tags:
-      - public-api
+      - Public API
       summary: Parse Sync
       description: Parse a document and wait for the result (small documents; use /parse_async for large ones).
       operationId: parse_sync_api_v1_parse_post
@@ -199,12 +199,12 @@ paths:
   /api/v1/upload:
     post:
       tags:
-      - public-api
+      - Public API
       summary: Upload File
       description: 'Stage a document and return an opaque ``file_id``.
 
 
-        Pass ``ndi://file/<file_id>`` as ``source_url`` on any action endpoint.
+        Pass ``ndi://file/`` as ``source_url`` on any action endpoint.
 
         Upload once, reuse across parse → categorize / ground.
 
@@ -291,7 +291,7 @@ paths:
   /api/v1/ground_async:
     post:
       tags:
-      - public-api
+      - Public API
       summary: Ground Async
       description: 'Start a ground job: locate values inside a document.'
       operationId: ground_async_api_v1_ground_async_post
@@ -379,7 +379,7 @@ paths:
   /api/v1/ground:
     post:
       tags:
-      - public-api
+      - Public API
       summary: Ground Sync
       description: Ground values in a document and wait for the result.
       operationId: ground_sync_api_v1_ground_post
@@ -481,7 +481,7 @@ paths:
   /api/v1/categorize_async:
     post:
       tags:
-      - public-api
+      - Public API
       summary: Categorize Async
       description: 'Start a categorize job: classify document segments/sheets against a taxonomy.'
       operationId: categorize_async_api_v1_categorize_async_post
@@ -569,7 +569,7 @@ paths:
   /api/v1/categorize:
     post:
       tags:
-      - public-api
+      - Public API
       summary: Categorize Sync
       description: Categorize a document and wait for the result.
       operationId: categorize_sync_api_v1_categorize_post
@@ -671,7 +671,7 @@ paths:
   /api/v1/extract_async:
     post:
       tags:
-      - public-api
+      - Public API
       summary: Extract Async
       description: 'Start an extract job: pull schema-shaped structured data out of a document.'
       operationId: extract_async_api_v1_extract_async_post
@@ -759,7 +759,7 @@ paths:
   /api/v1/extract:
     post:
       tags:
-      - public-api
+      - Public API
       summary: Extract Sync
       description: Extract structured data from a document and wait for the result.
       operationId: extract_sync_api_v1_extract_post
@@ -861,7 +861,7 @@ paths:
   /api/v1/jobs:
     get:
       tags:
-      - public-api
+      - Public API
       summary: List Jobs
       description: List the tenant's jobs, newest first (summaries only — no result payloads).
       operationId: list_jobs_api_v1_jobs_get
@@ -971,7 +971,7 @@ paths:
   /api/v1/jobs/{job_id}:
     get:
       tags:
-      - public-api
+      - Public API
       summary: Get Job
       description: Return the current state of a job (tenant-scoped; other tenants see 404).
       operationId: get_job_api_v1_jobs__job_id__get
@@ -1055,7 +1055,7 @@ paths:
   /api/v1/jobs/{job_id}/cancel:
     post:
       tags:
-      - public-api
+      - Public API
       summary: Cancel Job
       description: 'Cancel a pending/running job.
 
@@ -1145,7 +1145,6 @@ paths:
           description: Service Unavailable
 components:
   schemas:
-    JsonValue: {}
     CategorizeResult:
       properties:
         result_type:
@@ -1179,66 +1178,51 @@ components:
           title: Items
       type: object
       title: CategorizeResult
-    UploadResponse:
+    GroundItem:
       properties:
-        file_id:
+        item_id:
           type: string
-          format: uuid
-          title: File Id
-        file_name:
+          title: Item Id
+          description: Caller-assigned identifier echoed back in the result.
+        query:
           type: string
-          title: File Name
-        expires_at:
-          type: string
-          format: date-time
-          title: Expires At
+          title: Query
+          description: Text, value, or phrase to locate. Closest-match wins.
+        semantic:
+          type: boolean
+          title: Semantic
+          description: When true, ``query`` is a semantic description of what to find (e.g. 'total liabilities') rather than the literal text.
+          default: false
+        hints:
+          anyOf:
+          - $ref: '#/components/schemas/GroundItemHints'
+          - type: 'null'
+          description: Optional modality-specific hints.
       additionalProperties: false
       type: object
       required:
-      - file_id
-      - file_name
-      - expires_at
-      title: UploadResponse
-      description: 'Returned by ``POST /upload``: an opaque handle for later job starts.'
-    CategorizedSegment:
+      - item_id
+      - query
+      title: GroundItem
+      description: One value to locate in the source document.
+    GroundOptions:
       properties:
-        kind:
-          type: string
-          const: document_segment
-          title: Kind
-          default: document_segment
-        file_name:
-          type: string
-          title: File Name
-        page_start:
-          type: integer
-          title: Page Start
-        page_end:
-          type: integer
-          title: Page End
-        category:
-          type: string
-          title: Category
-        is_freeform_category:
+        confidence_threshold:
+          type: number
+          maximum: 1.0
+          minimum: 0.0
+          title: Confidence Threshold
+          description: Minimum confidence to include a match.
+          default: 0.75
+        return_cropped_images:
           type: boolean
-          title: Is Freeform Category
+          title: Return Cropped Images
+          description: Also upload cropped images of visual matches.
           default: false
-        summary:
-          type: string
-          title: Summary
-        markdown_url:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Markdown Url
+      additionalProperties: false
       type: object
-      required:
-      - file_name
-      - page_start
-      - page_end
-      - category
-      - summary
-      title: CategorizedSegment
+      title: GroundOptions
+      description: Caller-tunable grounding options. Providers and model settings are server-owned.
     JobError:
       properties:
         code:
@@ -1254,80 +1238,42 @@ components:
       - code
       - message
       title: JobError
-    ErrorDetail:
+    GroundItemHints:
       properties:
-        code:
-          type: string
-          title: Code
-          description: Stable, machine-readable error code (e.g. ``invalid_payload``).
-        message:
-          type: string
-          title: Message
-          description: Human-readable detail about the error.
-        request_id:
-          type: string
-          title: Request Id
-          description: Per-request correlation id; matches the ``X-Request-Id`` header.
+        visual:
+          anyOf:
+          - $ref: '#/components/schemas/GroundVisualHints'
+          - type: 'null'
+        spreadsheet:
+          anyOf:
+          - $ref: '#/components/schemas/GroundSpreadsheetHints'
+          - type: 'null'
       additionalProperties: false
       type: object
-      required:
-      - code
-      - message
-      - request_id
-      title: ErrorDetail
-      description: 'Inner error envelope used by :class:`ErrorResponse`.
-
-
-        ``request_id`` is always populated; callers can quote it back to support
-
-        so we can correlate against logs without having to share the underlying
-
-        Postgres row UUID.'
-    VisualRegionMatch:
+      title: GroundItemHints
+    GroundSpreadsheetHints:
       properties:
-        match_type:
-          type: string
-          const: visual_region
-          title: Match Type
-          default: visual_region
-        page:
-          type: integer
-          title: Page
-          description: 1-indexed page number.
-        x:
-          type: number
-          title: X
-        y:
-          type: number
-          title: Y
-        w:
-          type: number
-          title: W
-        h:
-          type: number
-          title: H
-        confidence:
-          type: number
-          title: Confidence
-          default: 1.0
-        matched_text:
+        sheet_name:
           anyOf:
           - type: string
           - type: 'null'
-          title: Matched Text
-        cropped_image_url:
+          title: Sheet Name
+          description: Sheet name hint.
+        cell_hint:
           anyOf:
           - type: string
           - type: 'null'
-          title: Cropped Image Url
+          title: Cell Hint
+          description: Cell hint such as 'B12'.
+        range_hint:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Range Hint
+          description: Range hint such as 'B12:D18'.
+      additionalProperties: false
       type: object
-      required:
-      - page
-      - x
-      - y
-      - w
-      - h
-      title: VisualRegionMatch
+      title: GroundSpreadsheetHints
     JobStatus:
       properties:
         job_id:
@@ -1388,6 +1334,176 @@ components:
       - created_at
       title: JobStatus
       description: Response for ``GET /jobs/{job_id}`` and the sync endpoints.
+    JsonValue: {}
+    CategorizedSegment:
+      properties:
+        kind:
+          type: string
+          const: document_segment
+          title: Kind
+          default: document_segment
+        file_name:
+          type: string
+          title: File Name
+        page_start:
+          type: integer
+          title: Page Start
+        page_end:
+          type: integer
+          title: Page End
+        category:
+          type: string
+          title: Category
+        is_freeform_category:
+          type: boolean
+          title: Is Freeform Category
+          default: false
+        summary:
+          type: string
+          title: Summary
+        markdown_url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Markdown Url
+      type: object
+      required:
+      - file_name
+      - page_start
+      - page_end
+      - category
+      - summary
+      title: CategorizedSegment
+    CategorizeJobRequest:
+      properties:
+        file:
+          $ref: '#/components/schemas/FileInput'
+          description: 'File to categorize. Supported extensions: ``.csv``, ``.doc``, ``.docm``, ``.docx``, ``.eml``, ``.htm``, ``.html``, ``.jpeg``, ``.jpg``, ``.log``, ``.msg``, ``.pdf``, ``.png``, ``.ppt``, ``.pptx``, ``.tif``, ``.tiff``, ``.txt``, ``.vsd``, ``.vsdx``, ``.webp``, ``.xls``, ``.xlsm``, ``.xlsx``, ``.xml``.'
+        markdown_url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Markdown Url
+          description: Markdown from a prior parse of the same file; skips the internal parse when present.
+        taxonomy:
+          anyOf:
+          - $ref: '#/components/schemas/Taxonomy'
+          - type: 'null'
+          description: Category vocabulary to classify against. Omit to use NDI's default taxonomy.
+        idempotency_key:
+          anyOf:
+          - type: string
+            maxLength: 128
+          - type: 'null'
+          title: Idempotency Key
+      additionalProperties: false
+      type: object
+      required:
+      - file
+      title: CategorizeJobRequest
+      description: Body for ``POST /categorize`` and ``POST /categorize_async``.
+    SpreadsheetRangeMatch:
+      properties:
+        match_type:
+          type: string
+          const: spreadsheet_range
+          title: Match Type
+          default: spreadsheet_range
+        sheet_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Sheet Name
+        cell_range:
+          type: string
+          title: Cell Range
+        confidence:
+          type: number
+          title: Confidence
+          default: 1.0
+        matched_text:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Matched Text
+      type: object
+      required:
+      - cell_range
+      title: SpreadsheetRangeMatch
+    JsonlRecordMatch:
+      properties:
+        match_type:
+          type: string
+          const: jsonl_record
+          title: Match Type
+          default: jsonl_record
+        line_index:
+          type: integer
+          title: Line Index
+        keys:
+          items:
+            type: string
+          type: array
+          title: Keys
+        confidence:
+          type: number
+          title: Confidence
+          default: 1.0
+        matched_text:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Matched Text
+      type: object
+      required:
+      - line_index
+      - keys
+      title: JsonlRecordMatch
+    JobAccepted:
+      properties:
+        job_id:
+          type: string
+          format: uuid
+          title: Job Id
+      additionalProperties: false
+      type: object
+      required:
+      - job_id
+      title: JobAccepted
+      description: 'Returned by the async endpoints: the job started, poll ``GET /jobs/{job_id}``.'
+    ParseResult:
+      properties:
+        result_type:
+          type: string
+          const: parse
+          title: Result Type
+          default: parse
+        status:
+          type: string
+          enum:
+          - success
+          - failed
+          title: Status
+          default: success
+        error:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Error
+        item:
+          anyOf:
+          - oneOf:
+            - $ref: '#/components/schemas/ParsedFile'
+            - $ref: '#/components/schemas/ParsedTable'
+            discriminator:
+              propertyName: item_type
+              mapping:
+                file: '#/components/schemas/ParsedFile'
+                table: '#/components/schemas/ParsedTable'
+          - type: 'null'
+          title: Item
+      type: object
+      title: ParseResult
     GroundVisualHints:
       properties:
         anchor_text:
@@ -1407,138 +1523,130 @@ components:
       additionalProperties: false
       type: object
       title: GroundVisualHints
-    JobList:
+    ErrorDetail:
       properties:
-        jobs:
-          items:
-            $ref: '#/components/schemas/JobSummary'
-          type: array
-          title: Jobs
-        next_cursor:
+        code:
+          type: string
+          title: Code
+          description: Stable, machine-readable error code (e.g. ``invalid_payload``).
+        message:
+          type: string
+          title: Message
+          description: Human-readable detail about the error.
+        request_id:
+          type: string
+          title: Request Id
+          description: Per-request correlation id; matches the ``X-Request-Id`` header.
+      additionalProperties: false
+      type: object
+      required:
+      - code
+      - message
+      - request_id
+      title: ErrorDetail
+      description: 'Inner error envelope used by :class:`ErrorResponse`.
+
+
+        ``request_id`` is always populated; callers can quote it back to support
+
+        so we can correlate against logs without having to share the underlying
+
+        Postgres row UUID.'
+    TaxonomyCategory:
+      properties:
+        key:
+          type: string
+          title: Key
+          description: Stable category key, e.g. 'general_ledger'.
+        description:
           anyOf:
           - type: string
           - type: 'null'
-          title: Next Cursor
-          description: Pass as ``cursor`` to fetch the next (older) page; null when exhausted.
-      type: object
-      title: JobList
-      description: 'Response for ``GET /jobs``: newest first, cursor-paginated.'
-    ParsedFile:
-      properties:
-        item_type:
-          type: string
-          const: file
-          title: Item Type
-          default: file
-        markdown_url:
-          type: string
-          title: Markdown Url
-        page_count:
-          type: integer
-          title: Page Count
-          default: 0
-        char_count:
-          type: integer
-          title: Char Count
-          default: 0
-        extraction_duration_ms:
-          type: integer
-          title: Extraction Duration Ms
-          default: 0
+          title: Description
+          description: Shown to the classifier; improves accuracy.
+      additionalProperties: false
       type: object
       required:
-      - markdown_url
-      title: ParsedFile
-    JobSummary:
+      - key
+      title: TaxonomyCategory
+    FileInput:
       properties:
-        job_id:
+        source_url:
           type: string
-          format: uuid
-          title: Job Id
-        action:
+          title: Source Url
+          description: '``s3://bucket/key``, ``https://`` (presigned/public), or ``ndi://file/<uuid>`` from ``POST /upload``.'
+        file_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: File Name
+          description: Original filename; used to infer the format. Required for ``s3://`` / ``https://``. Optional for ``ndi://file/<uuid>`` (defaults to the name captured at upload; a provided value overrides inference only).
+      additionalProperties: false
+      type: object
+      required:
+      - source_url
+      title: FileInput
+      description: The document to process.
+    GroundDerivedSources:
+      properties:
+        markdown_url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Markdown Url
+          description: Markdown from a prior parse of the same file.
+        transcript_url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Transcript Url
+          description: Transcript derived from the source media.
+        jsonl_url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Jsonl Url
+          description: JSONL artifact derived from the source.
+      additionalProperties: false
+      type: object
+      title: GroundDerivedSources
+      description: Artifacts from prior NDI runs that speed up / improve grounding.
+    GroundItemResult:
+      properties:
+        item_id:
           type: string
-          title: Action
-        status:
-          type: string
-          title: Status
+          title: Item Id
+        found:
+          type: boolean
+          title: Found
+          default: false
+        matches:
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/VisualRegionMatch'
+            - $ref: '#/components/schemas/AudioRangeMatch'
+            - $ref: '#/components/schemas/SpreadsheetRangeMatch'
+            - $ref: '#/components/schemas/TextRangeMatch'
+            - $ref: '#/components/schemas/JsonlRecordMatch'
+            discriminator:
+              propertyName: match_type
+              mapping:
+                audio_range: '#/components/schemas/AudioRangeMatch'
+                jsonl_record: '#/components/schemas/JsonlRecordMatch'
+                spreadsheet_range: '#/components/schemas/SpreadsheetRangeMatch'
+                text_range: '#/components/schemas/TextRangeMatch'
+                visual_region: '#/components/schemas/VisualRegionMatch'
+          type: array
+          title: Matches
         error:
           anyOf:
-          - $ref: '#/components/schemas/JobError'
-          - type: 'null'
-        created_at:
-          type: string
-          format: date-time
-          title: Created At
-        completed_at:
-          anyOf:
-          - type: string
-            format: date-time
-          - type: 'null'
-          title: Completed At
-      type: object
-      required:
-      - job_id
-      - action
-      - status
-      - created_at
-      title: JobSummary
-      description: One row of ``GET /jobs`` — deliberately light (no result payloads).
-    AudioRangeMatch:
-      properties:
-        match_type:
-          type: string
-          const: audio_range
-          title: Match Type
-          default: audio_range
-        start_ms:
-          type: integer
-          title: Start Ms
-        end_ms:
-          type: integer
-          title: End Ms
-        confidence:
-          type: number
-          title: Confidence
-          default: 1.0
-        matched_text:
-          anyOf:
           - type: string
           - type: 'null'
-          title: Matched Text
+          title: Error
       type: object
       required:
-      - start_ms
-      - end_ms
-      title: AudioRangeMatch
-    ParsedSheet:
-      properties:
-        sheet_name:
-          type: string
-          title: Sheet Name
-        markdown_url:
-          type: string
-          title: Markdown Url
-        max_row:
-          type: integer
-          title: Max Row
-          default: 0
-        max_col:
-          type: integer
-          title: Max Col
-          default: 0
-        char_count:
-          type: integer
-          title: Char Count
-          default: 0
-        non_empty_cell_count:
-          type: integer
-          title: Non Empty Cell Count
-          default: 0
-      type: object
-      required:
-      - sheet_name
-      - markdown_url
-      title: ParsedSheet
+      - item_id
+      title: GroundItemResult
     GroundJobRequest:
       properties:
         file:
@@ -1571,72 +1679,59 @@ components:
       - items
       title: GroundJobRequest
       description: Body for ``POST /ground`` and ``POST /ground_async``.
-    GroundItemHints:
+    ParsedFile:
       properties:
-        visual:
-          anyOf:
-          - $ref: '#/components/schemas/GroundVisualHints'
-          - type: 'null'
-        spreadsheet:
-          anyOf:
-          - $ref: '#/components/schemas/GroundSpreadsheetHints'
-          - type: 'null'
-      additionalProperties: false
-      type: object
-      title: GroundItemHints
-    ExtractJobRequest:
-      properties:
-        file:
-          $ref: '#/components/schemas/FileInput'
-          description: 'File to extract from. Supported extensions: ``.csv``, ``.doc``, ``.docm``, ``.docx``, ``.eml``, ``.htm``, ``.html``, ``.jpeg``, ``.jpg``, ``.log``, ``.md``, ``.mdx``, ``.msg``, ``.pdf``, ``.png``, ``.ppt``, ``.pptx``, ``.tif``, ``.tiff``, ``.txt``, ``.vsd``, ``.vsdx``, ``.webp``, ``.xls``, ``.xlsm``, ``.xlsx``, ``.xml``.'
-        schema:
-          additionalProperties:
-            $ref: '#/components/schemas/JsonValue'
-          type: object
-          title: Schema
-          description: JSON Schema describing the data to extract. Root must be an object with properties; nesting is bounded; composition keywords ($ref/anyOf/oneOf/allOf/not) are not supported. Field descriptions directly guide extraction accuracy. Top-level arrays are extracted segment-by-segment across long documents and concatenated.
+        item_type:
+          type: string
+          const: file
+          title: Item Type
+          default: file
         markdown_url:
-          anyOf:
-          - type: string
-          - type: 'null'
+          type: string
           title: Markdown Url
-          description: Markdown from a prior parse of the same file; skips the internal parse when present.
-        idempotency_key:
-          anyOf:
-          - type: string
-            maxLength: 128
-          - type: 'null'
-          title: Idempotency Key
-      additionalProperties: false
+        page_count:
+          type: integer
+          title: Page Count
+          default: 0
+        char_count:
+          type: integer
+          title: Char Count
+          default: 0
+        extraction_duration_ms:
+          type: integer
+          title: Extraction Duration Ms
+          default: 0
       type: object
       required:
-      - file
-      - schema
-      title: ExtractJobRequest
-      description: Body for ``POST /extract`` and ``POST /extract_async``.
-    GroundSpreadsheetHints:
+      - markdown_url
+      title: ParsedFile
+    TextRangeMatch:
       properties:
-        sheet_name:
+        match_type:
+          type: string
+          const: text_range
+          title: Match Type
+          default: text_range
+        start_char:
+          type: integer
+          title: Start Char
+        end_char:
+          type: integer
+          title: End Char
+        confidence:
+          type: number
+          title: Confidence
+          default: 1.0
+        matched_text:
           anyOf:
           - type: string
           - type: 'null'
-          title: Sheet Name
-          description: Sheet name hint.
-        cell_hint:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Cell Hint
-          description: Cell hint such as 'B12'.
-        range_hint:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Range Hint
-          description: Range hint such as 'B12:D18'.
-      additionalProperties: false
+          title: Matched Text
       type: object
-      title: GroundSpreadsheetHints
+      required:
+      - start_char
+      - end_char
+      title: TextRangeMatch
     ExtractResult:
       properties:
         result_type:
@@ -1680,29 +1775,60 @@ components:
           default: 0
       type: object
       title: ExtractResult
-    Body_upload_file_api_v1_upload_post:
+    JobList:
       properties:
-        file:
-          type: string
-          contentMediaType: application/octet-stream
-          title: File
-          description: The document to stage for later parse/categorize/ground.
+        jobs:
+          items:
+            $ref: '#/components/schemas/JobSummary'
+          type: array
+          title: Jobs
+        next_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Next Cursor
+          description: Pass as ``cursor`` to fetch the next (older) page; null when exhausted.
       type: object
-      required:
-      - file
-      title: Body_upload_file_api_v1_upload_post
-    JobAccepted:
+      title: JobList
+      description: 'Response for ``GET /jobs``: newest first, cursor-paginated.'
+    ErrorResponse:
       properties:
-        job_id:
-          type: string
-          format: uuid
-          title: Job Id
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
       additionalProperties: false
       type: object
       required:
-      - job_id
-      title: JobAccepted
-      description: 'Returned by the async endpoints: the job started, poll ``GET /jobs/{job_id}``.'
+      - error
+      title: ErrorResponse
+      description: 'Top-level error body returned by every non-2xx response.
+
+
+        The OpenAPI schema declares this shape so client SDKs can branch on
+
+        ``response.error.code`` deterministically rather than parsing free-form
+
+        ``detail`` strings.'
+    UploadResponse:
+      properties:
+        file_id:
+          type: string
+          format: uuid
+          title: File Id
+        file_name:
+          type: string
+          title: File Name
+        expires_at:
+          type: string
+          format: date-time
+          title: Expires At
+      additionalProperties: false
+      type: object
+      required:
+      - file_id
+      - file_name
+      - expires_at
+      title: UploadResponse
+      description: 'Returned by ``POST /upload``: an opaque handle for later job starts.'
     ParseJobRequest:
       properties:
         file:
@@ -1721,22 +1847,137 @@ components:
       - file
       title: ParseJobRequest
       description: Body for ``POST /parse`` and ``POST /parse_async``.
-    CategorizeJobRequest:
+    ParsedSheet:
+      properties:
+        sheet_name:
+          type: string
+          title: Sheet Name
+        markdown_url:
+          type: string
+          title: Markdown Url
+        max_row:
+          type: integer
+          title: Max Row
+          default: 0
+        max_col:
+          type: integer
+          title: Max Col
+          default: 0
+        char_count:
+          type: integer
+          title: Char Count
+          default: 0
+        non_empty_cell_count:
+          type: integer
+          title: Non Empty Cell Count
+          default: 0
+      type: object
+      required:
+      - sheet_name
+      - markdown_url
+      title: ParsedSheet
+    AudioRangeMatch:
+      properties:
+        match_type:
+          type: string
+          const: audio_range
+          title: Match Type
+          default: audio_range
+        start_ms:
+          type: integer
+          title: Start Ms
+        end_ms:
+          type: integer
+          title: End Ms
+        confidence:
+          type: number
+          title: Confidence
+          default: 1.0
+        matched_text:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Matched Text
+      type: object
+      required:
+      - start_ms
+      - end_ms
+      title: AudioRangeMatch
+    Taxonomy:
+      properties:
+        categories:
+          items:
+            $ref: '#/components/schemas/TaxonomyCategory'
+          type: array
+          minItems: 1
+          title: Categories
+      additionalProperties: false
+      type: object
+      required:
+      - categories
+      title: Taxonomy
+    VisualRegionMatch:
+      properties:
+        match_type:
+          type: string
+          const: visual_region
+          title: Match Type
+          default: visual_region
+        page:
+          type: integer
+          title: Page
+          description: 1-indexed page number.
+        x:
+          type: number
+          title: X
+        y:
+          type: number
+          title: Y
+        w:
+          type: number
+          title: W
+        h:
+          type: number
+          title: H
+        confidence:
+          type: number
+          title: Confidence
+          default: 1.0
+        matched_text:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Matched Text
+        cropped_image_url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Cropped Image Url
+      type: object
+      required:
+      - page
+      - x
+      - y
+      - w
+      - h
+      title: VisualRegionMatch
+    ExtractJobRequest:
       properties:
         file:
           $ref: '#/components/schemas/FileInput'
-          description: 'File to categorize. Supported extensions: ``.csv``, ``.doc``, ``.docm``, ``.docx``, ``.eml``, ``.htm``, ``.html``, ``.jpeg``, ``.jpg``, ``.log``, ``.msg``, ``.pdf``, ``.png``, ``.ppt``, ``.pptx``, ``.tif``, ``.tiff``, ``.txt``, ``.vsd``, ``.vsdx``, ``.webp``, ``.xls``, ``.xlsm``, ``.xlsx``, ``.xml``.'
+          description: 'File to extract from. Supported extensions: ``.csv``, ``.doc``, ``.docm``, ``.docx``, ``.eml``, ``.htm``, ``.html``, ``.jpeg``, ``.jpg``, ``.log``, ``.md``, ``.mdx``, ``.msg``, ``.pdf``, ``.png``, ``.ppt``, ``.pptx``, ``.tif``, ``.tiff``, ``.txt``, ``.vsd``, ``.vsdx``, ``.webp``, ``.xls``, ``.xlsm``, ``.xlsx``, ``.xml``.'
+        schema:
+          additionalProperties:
+            $ref: '#/components/schemas/JsonValue'
+          type: object
+          title: Schema
+          description: JSON Schema describing the data to extract. Root must be an object with properties; nesting is bounded; composition keywords ($ref/anyOf/oneOf/allOf/not) are not supported. Field descriptions directly guide extraction accuracy. Top-level arrays are extracted segment-by-segment across long documents and concatenated.
         markdown_url:
           anyOf:
           - type: string
           - type: 'null'
           title: Markdown Url
           description: Markdown from a prior parse of the same file; skips the internal parse when present.
-        taxonomy:
-          anyOf:
-          - $ref: '#/components/schemas/Taxonomy'
-          - type: 'null'
-          description: Category vocabulary to classify against. Omit to use NDI's default taxonomy.
         idempotency_key:
           anyOf:
           - type: string
@@ -1747,298 +1988,9 @@ components:
       type: object
       required:
       - file
-      title: CategorizeJobRequest
-      description: Body for ``POST /categorize`` and ``POST /categorize_async``.
-    GroundItem:
-      properties:
-        item_id:
-          type: string
-          title: Item Id
-          description: Caller-assigned identifier echoed back in the result.
-        query:
-          type: string
-          title: Query
-          description: Text, value, or phrase to locate. Closest-match wins.
-        semantic:
-          type: boolean
-          title: Semantic
-          description: When true, ``query`` is a semantic description of what to find (e.g. 'total liabilities') rather than the literal text.
-          default: false
-        hints:
-          anyOf:
-          - $ref: '#/components/schemas/GroundItemHints'
-          - type: 'null'
-          description: Optional modality-specific hints.
-      additionalProperties: false
-      type: object
-      required:
-      - item_id
-      - query
-      title: GroundItem
-      description: One value to locate in the source document.
-    GroundItemResult:
-      properties:
-        item_id:
-          type: string
-          title: Item Id
-        found:
-          type: boolean
-          title: Found
-          default: false
-        matches:
-          items:
-            oneOf:
-            - $ref: '#/components/schemas/VisualRegionMatch'
-            - $ref: '#/components/schemas/AudioRangeMatch'
-            - $ref: '#/components/schemas/SpreadsheetRangeMatch'
-            - $ref: '#/components/schemas/TextRangeMatch'
-            - $ref: '#/components/schemas/JsonlRecordMatch'
-            discriminator:
-              propertyName: match_type
-              mapping:
-                audio_range: '#/components/schemas/AudioRangeMatch'
-                jsonl_record: '#/components/schemas/JsonlRecordMatch'
-                spreadsheet_range: '#/components/schemas/SpreadsheetRangeMatch'
-                text_range: '#/components/schemas/TextRangeMatch'
-                visual_region: '#/components/schemas/VisualRegionMatch'
-          type: array
-          title: Matches
-        error:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Error
-      type: object
-      required:
-      - item_id
-      title: GroundItemResult
-    TextRangeMatch:
-      properties:
-        match_type:
-          type: string
-          const: text_range
-          title: Match Type
-          default: text_range
-        start_char:
-          type: integer
-          title: Start Char
-        end_char:
-          type: integer
-          title: End Char
-        confidence:
-          type: number
-          title: Confidence
-          default: 1.0
-        matched_text:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Matched Text
-      type: object
-      required:
-      - start_char
-      - end_char
-      title: TextRangeMatch
-    ErrorResponse:
-      properties:
-        error:
-          $ref: '#/components/schemas/ErrorDetail'
-      additionalProperties: false
-      type: object
-      required:
-      - error
-      title: ErrorResponse
-      description: 'Top-level error body returned by every non-2xx response.
-
-
-        The OpenAPI schema declares this shape so client SDKs can branch on
-
-        ``response.error.code`` deterministically rather than parsing free-form
-
-        ``detail`` strings.'
-    GroundOptions:
-      properties:
-        confidence_threshold:
-          type: number
-          maximum: 1.0
-          minimum: 0.0
-          title: Confidence Threshold
-          description: Minimum confidence to include a match.
-          default: 0.75
-        return_cropped_images:
-          type: boolean
-          title: Return Cropped Images
-          description: Also upload cropped images of visual matches.
-          default: false
-      additionalProperties: false
-      type: object
-      title: GroundOptions
-      description: Caller-tunable grounding options. Providers and model settings are server-owned.
-    ParseResult:
-      properties:
-        result_type:
-          type: string
-          const: parse
-          title: Result Type
-          default: parse
-        status:
-          type: string
-          enum:
-          - success
-          - failed
-          title: Status
-          default: success
-        error:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Error
-        item:
-          anyOf:
-          - oneOf:
-            - $ref: '#/components/schemas/ParsedFile'
-            - $ref: '#/components/schemas/ParsedTable'
-            discriminator:
-              propertyName: item_type
-              mapping:
-                file: '#/components/schemas/ParsedFile'
-                table: '#/components/schemas/ParsedTable'
-          - type: 'null'
-          title: Item
-      type: object
-      title: ParseResult
-    JsonlRecordMatch:
-      properties:
-        match_type:
-          type: string
-          const: jsonl_record
-          title: Match Type
-          default: jsonl_record
-        line_index:
-          type: integer
-          title: Line Index
-        keys:
-          items:
-            type: string
-          type: array
-          title: Keys
-        confidence:
-          type: number
-          title: Confidence
-          default: 1.0
-        matched_text:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Matched Text
-      type: object
-      required:
-      - line_index
-      - keys
-      title: JsonlRecordMatch
-    GroundResult:
-      properties:
-        result_type:
-          type: string
-          const: ground
-          title: Result Type
-          default: ground
-        results:
-          items:
-            $ref: '#/components/schemas/GroundItemResult'
-          type: array
-          title: Results
-        total_items_found:
-          type: integer
-          title: Total Items Found
-          default: 0
-        total_items_requested:
-          type: integer
-          title: Total Items Requested
-          default: 0
-        duration_ms:
-          type: integer
-          title: Duration Ms
-          default: 0
-      type: object
-      title: GroundResult
-    FileInput:
-      properties:
-        source_url:
-          type: string
-          title: Source Url
-          description: '``s3://bucket/key``, ``https://`` (presigned/public), or ``ndi://file/<uuid>`` from ``POST /upload``.'
-        file_name:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: File Name
-          description: Original filename; used to infer the format. Required for ``s3://`` / ``https://``. Optional for ``ndi://file/<uuid>`` (defaults to the name captured at upload; a provided value overrides inference only).
-      additionalProperties: false
-      type: object
-      required:
-      - source_url
-      title: FileInput
-      description: The document to process.
-    ParsedTable:
-      properties:
-        item_type:
-          type: string
-          const: table
-          title: Item Type
-          default: table
-        sheets:
-          items:
-            $ref: '#/components/schemas/ParsedSheet'
-          type: array
-          title: Sheets
-      type: object
-      title: ParsedTable
-    SpreadsheetRangeMatch:
-      properties:
-        match_type:
-          type: string
-          const: spreadsheet_range
-          title: Match Type
-          default: spreadsheet_range
-        sheet_name:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Sheet Name
-        cell_range:
-          type: string
-          title: Cell Range
-        confidence:
-          type: number
-          title: Confidence
-          default: 1.0
-        matched_text:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Matched Text
-      type: object
-      required:
-      - cell_range
-      title: SpreadsheetRangeMatch
-    TaxonomyCategory:
-      properties:
-        key:
-          type: string
-          title: Key
-          description: Stable category key, e.g. 'general_ledger'.
-        description:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Description
-          description: Shown to the classifier; improves accuracy.
-      additionalProperties: false
-      type: object
-      required:
-      - key
-      title: TaxonomyCategory
+      - schema
+      title: ExtractJobRequest
+      description: Body for ``POST /extract`` and ``POST /extract_async``.
     CategorizedSheet:
       properties:
         kind:
@@ -2076,43 +2028,91 @@ components:
       - categories
       - summary
       title: CategorizedSheet
-    Taxonomy:
+    JobSummary:
       properties:
-        categories:
-          items:
-            $ref: '#/components/schemas/TaxonomyCategory'
-          type: array
-          minItems: 1
-          title: Categories
-      additionalProperties: false
+        job_id:
+          type: string
+          format: uuid
+          title: Job Id
+        action:
+          type: string
+          title: Action
+        status:
+          type: string
+          title: Status
+        error:
+          anyOf:
+          - $ref: '#/components/schemas/JobError'
+          - type: 'null'
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        completed_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Completed At
       type: object
       required:
-      - categories
-      title: Taxonomy
-    GroundDerivedSources:
+      - job_id
+      - action
+      - status
+      - created_at
+      title: JobSummary
+      description: One row of ``GET /jobs`` — deliberately light (no result payloads).
+    GroundResult:
       properties:
-        markdown_url:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Markdown Url
-          description: Markdown from a prior parse of the same file.
-        transcript_url:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Transcript Url
-          description: Transcript derived from the source media.
-        jsonl_url:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Jsonl Url
-          description: JSONL artifact derived from the source.
-      additionalProperties: false
+        result_type:
+          type: string
+          const: ground
+          title: Result Type
+          default: ground
+        results:
+          items:
+            $ref: '#/components/schemas/GroundItemResult'
+          type: array
+          title: Results
+        total_items_found:
+          type: integer
+          title: Total Items Found
+          default: 0
+        total_items_requested:
+          type: integer
+          title: Total Items Requested
+          default: 0
+        duration_ms:
+          type: integer
+          title: Duration Ms
+          default: 0
       type: object
-      title: GroundDerivedSources
-      description: Artifacts from prior NDI runs that speed up / improve grounding.
+      title: GroundResult
+    ParsedTable:
+      properties:
+        item_type:
+          type: string
+          const: table
+          title: Item Type
+          default: table
+        sheets:
+          items:
+            $ref: '#/components/schemas/ParsedSheet'
+          type: array
+          title: Sheets
+      type: object
+      title: ParsedTable
+    Body_upload_file_api_v1_upload_post:
+      properties:
+        file:
+          type: string
+          contentMediaType: application/octet-stream
+          title: File
+          description: The document to stage for later parse/categorize/ground.
+      type: object
+      required:
+      - file
+      title: Body_upload_file_api_v1_upload_post
   securitySchemes:
     APIKeyHeader:
       type: apiKey

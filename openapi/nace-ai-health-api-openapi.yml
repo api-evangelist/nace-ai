@@ -1,17 +1,34 @@
-openapi: 3.1.0
+openapi: 3.2.0
 info:
-  title: NDI Service health API
+  title: NDI Service Health API
   description: Nace Document Intelligence Service API
   version: 0.1.0
 tags:
-- name: health
+- name: Health
 paths:
   /api/v1/health/load:
     get:
       tags:
-      - health
+      - Health
       summary: Get Load Probe
-      description: "Return per-status (and per-action) row counts for the calling client.\n\nThe query is two ``GROUP BY`` selects against ``api_requests``:\n\n1. Status totals across all rows belonging to the client (cheap; the\n   table is partitioned by client in production and ``status`` is\n   cardinality-bounded).\n2. Status × action totals filtered to ``created_at >= now() - window``\n   (uses the existing ``(client, created_at)`` index).\n\nBoth queries are read-only and idempotent — safe to poll at 1 Hz."
+      description: 'Return per-status (and per-action) row counts for the calling client.
+
+
+        The query is two ``GROUP BY`` selects against ``api_requests``:
+
+
+        1. Status totals across all rows belonging to the client (cheap; the
+
+        table is partitioned by client in production and ``status`` is
+
+        cardinality-bounded).
+
+        2. Status × action totals filtered to ``created_at >= now() - window``
+
+        (uses the existing ``(client, created_at)`` index).
+
+
+        Both queries are read-only and idempotent — safe to poll at 1 Hz.'
       operationId: get_load_probe_api_v1_health_load_get
       security:
       - APIKeyHeader: []
@@ -96,45 +113,6 @@ paths:
           description: Service Unavailable
 components:
   schemas:
-    LoadProbeResponse:
-      properties:
-        client:
-          type: string
-          title: Client
-        window_seconds:
-          type: integer
-          title: Window Seconds
-        sampled_at:
-          type: string
-          format: date-time
-          title: Sampled At
-        in_flight:
-          $ref: '#/components/schemas/StatusCounts'
-          description: Counts across all rows (any age).
-        in_window:
-          $ref: '#/components/schemas/StatusCounts'
-          description: Counts for rows created within ``window_seconds``.
-        in_window_by_action:
-          $ref: '#/components/schemas/ActionCounts'
-          description: Per-action breakdown for rows created within ``window_seconds``.
-      additionalProperties: false
-      type: object
-      required:
-      - client
-      - window_seconds
-      - sampled_at
-      - in_flight
-      - in_window
-      - in_window_by_action
-      title: LoadProbeResponse
-      description: 'Server-side snapshot of ``api_requests`` for the calling client.
-
-
-        Both ``window_seconds`` and the total counts are returned so callers
-
-        can compute throughput (window counts) and saturation (in-flight =
-
-        ``pending`` + ``running``) without having to do their own arithmetic.'
     ActionCounts:
       properties:
         parse:
@@ -175,23 +153,6 @@ components:
       type: object
       title: StatusCounts
       description: Row counts for ``api_requests`` grouped by terminal/non-terminal state.
-    ErrorResponse:
-      properties:
-        error:
-          $ref: '#/components/schemas/ErrorDetail'
-      additionalProperties: false
-      type: object
-      required:
-      - error
-      title: ErrorResponse
-      description: 'Top-level error body returned by every non-2xx response.
-
-
-        The OpenAPI schema declares this shape so client SDKs can branch on
-
-        ``response.error.code`` deterministically rather than parsing free-form
-
-        ``detail`` strings.'
     ErrorDetail:
       properties:
         code:
@@ -221,6 +182,62 @@ components:
         so we can correlate against logs without having to share the underlying
 
         Postgres row UUID.'
+    ErrorResponse:
+      properties:
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+      additionalProperties: false
+      type: object
+      required:
+      - error
+      title: ErrorResponse
+      description: 'Top-level error body returned by every non-2xx response.
+
+
+        The OpenAPI schema declares this shape so client SDKs can branch on
+
+        ``response.error.code`` deterministically rather than parsing free-form
+
+        ``detail`` strings.'
+    LoadProbeResponse:
+      properties:
+        client:
+          type: string
+          title: Client
+        window_seconds:
+          type: integer
+          title: Window Seconds
+        sampled_at:
+          type: string
+          format: date-time
+          title: Sampled At
+        in_flight:
+          $ref: '#/components/schemas/StatusCounts'
+          description: Counts across all rows (any age).
+        in_window:
+          $ref: '#/components/schemas/StatusCounts'
+          description: Counts for rows created within ``window_seconds``.
+        in_window_by_action:
+          $ref: '#/components/schemas/ActionCounts'
+          description: Per-action breakdown for rows created within ``window_seconds``.
+      additionalProperties: false
+      type: object
+      required:
+      - client
+      - window_seconds
+      - sampled_at
+      - in_flight
+      - in_window
+      - in_window_by_action
+      title: LoadProbeResponse
+      description: 'Server-side snapshot of ``api_requests`` for the calling client.
+
+
+        Both ``window_seconds`` and the total counts are returned so callers
+
+        can compute throughput (window counts) and saturation (in-flight =
+
+        ``pending`` + ``running``) without having to do their own arithmetic.'
   securitySchemes:
     APIKeyHeader:
       type: apiKey
