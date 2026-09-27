@@ -113,46 +113,6 @@ paths:
           description: Service Unavailable
 components:
   schemas:
-    ActionCounts:
-      properties:
-        parse:
-          $ref: '#/components/schemas/StatusCounts'
-        ground:
-          $ref: '#/components/schemas/StatusCounts'
-        extract_region:
-          $ref: '#/components/schemas/StatusCounts'
-        segment_by_category:
-          $ref: '#/components/schemas/StatusCounts'
-      additionalProperties: false
-      type: object
-      title: ActionCounts
-      description: Per-action status breakdown.
-    StatusCounts:
-      properties:
-        pending:
-          type: integer
-          title: Pending
-          description: Rows inserted but workflow not yet running.
-          default: 0
-        running:
-          type: integer
-          title: Running
-          description: Rows the worker has claimed but not finalised.
-          default: 0
-        succeeded:
-          type: integer
-          title: Succeeded
-          description: Terminal — workflow finished cleanly.
-          default: 0
-        failed:
-          type: integer
-          title: Failed
-          description: Terminal — workflow surfaced a typed error.
-          default: 0
-      additionalProperties: false
-      type: object
-      title: StatusCounts
-      description: Row counts for ``api_requests`` grouped by terminal/non-terminal state.
     ErrorDetail:
       properties:
         code:
@@ -199,6 +159,32 @@ components:
         ``response.error.code`` deterministically rather than parsing free-form
 
         ``detail`` strings.'
+    StatusCounts:
+      properties:
+        pending:
+          type: integer
+          title: Pending
+          description: Rows inserted but workflow not yet running.
+          default: 0
+        running:
+          type: integer
+          title: Running
+          description: Rows the worker has claimed but not finalised.
+          default: 0
+        succeeded:
+          type: integer
+          title: Succeeded
+          description: Terminal — workflow finished cleanly.
+          default: 0
+        failed:
+          type: integer
+          title: Failed
+          description: Terminal — workflow surfaced a typed error.
+          default: 0
+      additionalProperties: false
+      type: object
+      title: StatusCounts
+      description: Row counts for ``api_requests`` grouped by terminal/non-terminal state.
     LoadProbeResponse:
       properties:
         client:
@@ -238,6 +224,20 @@ components:
         can compute throughput (window counts) and saturation (in-flight =
 
         ``pending`` + ``running``) without having to do their own arithmetic.'
+    ActionCounts:
+      properties:
+        parse:
+          $ref: '#/components/schemas/StatusCounts'
+        ground:
+          $ref: '#/components/schemas/StatusCounts'
+        extract_region:
+          $ref: '#/components/schemas/StatusCounts'
+        segment_by_category:
+          $ref: '#/components/schemas/StatusCounts'
+      additionalProperties: false
+      type: object
+      title: ActionCounts
+      description: Per-action status breakdown.
   securitySchemes:
     APIKeyHeader:
       type: apiKey

@@ -50,7 +50,7 @@ tags:
 - Document Processing
 - Data Extraction
 - OCR
-- Machine-Learning
+- Machine Learning
 - Enterprise Automation
 - MCP
 tags_raw:
@@ -63,6 +63,7 @@ tags_raw:
 - Machine Learning
 - Enterprise Automation
 - MCP
+- Machine-Learning
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
@@ -70,7 +71,7 @@ maintainers:
   email: info@apis.io
 apis:
 - aid: nace-ai:nace-ai-health-api
-  name: Nace Ai health API
+  name: Nace Ai Health API
   description: The health API from Nace Ai — 1 operation(s) for health.
   humanURL: https://docs.ndi.nace.ai
   baseURL: https://ndi-api.nace.ai/api/v1
@@ -88,7 +89,7 @@ apis:
   - type: Quickstart
     url: https://docs.ndi.nace.ai/quickstart
 - aid: nace-ai:nace-ai-public-api-api
-  name: Nace Ai public-api
+  name: Nace Ai Public API
   description: The public-api API from Nace Ai — 12 operation(s) for public-api.
   humanURL: https://docs.ndi.nace.ai
   baseURL: https://ndi-api.nace.ai/api/v1
