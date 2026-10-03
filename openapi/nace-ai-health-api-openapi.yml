@@ -113,6 +113,23 @@ paths:
           description: Service Unavailable
 components:
   schemas:
+    ErrorResponse:
+      properties:
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+      additionalProperties: false
+      type: object
+      required:
+      - error
+      title: ErrorResponse
+      description: 'Top-level error body returned by every non-2xx response.
+
+
+        The OpenAPI schema declares this shape so client SDKs can branch on
+
+        ``response.error.code`` deterministically rather than parsing free-form
+
+        ``detail`` strings.'
     ErrorDetail:
       properties:
         code:
@@ -142,23 +159,6 @@ components:
         so we can correlate against logs without having to share the underlying
 
         Postgres row UUID.'
-    ErrorResponse:
-      properties:
-        error:
-          $ref: '#/components/schemas/ErrorDetail'
-      additionalProperties: false
-      type: object
-      required:
-      - error
-      title: ErrorResponse
-      description: 'Top-level error body returned by every non-2xx response.
-
-
-        The OpenAPI schema declares this shape so client SDKs can branch on
-
-        ``response.error.code`` deterministically rather than parsing free-form
-
-        ``detail`` strings.'
     StatusCounts:
       properties:
         pending:
@@ -185,6 +185,20 @@ components:
       type: object
       title: StatusCounts
       description: Row counts for ``api_requests`` grouped by terminal/non-terminal state.
+    ActionCounts:
+      properties:
+        parse:
+          $ref: '#/components/schemas/StatusCounts'
+        ground:
+          $ref: '#/components/schemas/StatusCounts'
+        extract_region:
+          $ref: '#/components/schemas/StatusCounts'
+        segment_by_category:
+          $ref: '#/components/schemas/StatusCounts'
+      additionalProperties: false
+      type: object
+      title: ActionCounts
+      description: Per-action status breakdown.
     LoadProbeResponse:
       properties:
         client:
@@ -224,20 +238,6 @@ components:
         can compute throughput (window counts) and saturation (in-flight =
 
         ``pending`` + ``running``) without having to do their own arithmetic.'
-    ActionCounts:
-      properties:
-        parse:
-          $ref: '#/components/schemas/StatusCounts'
-        ground:
-          $ref: '#/components/schemas/StatusCounts'
-        extract_region:
-          $ref: '#/components/schemas/StatusCounts'
-        segment_by_category:
-          $ref: '#/components/schemas/StatusCounts'
-      additionalProperties: false
-      type: object
-      title: ActionCounts
-      description: Per-action status breakdown.
   securitySchemes:
     APIKeyHeader:
       type: apiKey
