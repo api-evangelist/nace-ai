@@ -113,23 +113,6 @@ paths:
           description: Service Unavailable
 components:
   schemas:
-    ErrorResponse:
-      properties:
-        error:
-          $ref: '#/components/schemas/ErrorDetail'
-      additionalProperties: false
-      type: object
-      required:
-      - error
-      title: ErrorResponse
-      description: 'Top-level error body returned by every non-2xx response.
-
-
-        The OpenAPI schema declares this shape so client SDKs can branch on
-
-        ``response.error.code`` deterministically rather than parsing free-form
-
-        ``detail`` strings.'
     ErrorDetail:
       properties:
         code:
@@ -185,6 +168,23 @@ components:
       type: object
       title: StatusCounts
       description: Row counts for ``api_requests`` grouped by terminal/non-terminal state.
+    ErrorResponse:
+      properties:
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+      additionalProperties: false
+      type: object
+      required:
+      - error
+      title: ErrorResponse
+      description: 'Top-level error body returned by every non-2xx response.
+
+
+        The OpenAPI schema declares this shape so client SDKs can branch on
+
+        ``response.error.code`` deterministically rather than parsing free-form
+
+        ``detail`` strings.'
     ActionCounts:
       properties:
         parse:
